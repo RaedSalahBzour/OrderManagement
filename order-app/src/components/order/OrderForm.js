@@ -57,7 +57,7 @@ export default function OrderForm(props) {
         setCustomerList(customerList);
       })
       .catch(err => console.log(err));
-  });
+  }, []);
 
   return (
     <Form>
