@@ -1,7 +1,7 @@
 import React from "react";
 import OrderForm from "./OrderForm";
 import useForm from "../../hooks/useForm";
-import { Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import SearchFoodItem from "./SearchFoodItem";
 import OrderedFoodItems from "./OrderedFoodItems";
 const generateOrderNumber = () =>
@@ -16,6 +16,7 @@ const getFreshModelObject = () => ({
   deletedOrderItemIds: "",
   orderDetails: [],
 });
+
 export default function Order() {
   const {
     values,
@@ -25,17 +26,25 @@ export default function Order() {
     handleInputChange,
     resetFromControls,
   } = useForm(getFreshModelObject);
+
   return (
     <>
       <Grid container>
         <Grid xs={12}>
-          <OrderForm {...{ values, errors, handleInputChange }} />
+          <OrderForm {...{ values, setValues, errors, handleInputChange }} />
         </Grid>
         <Grid xs={6}>
-          <SearchFoodItem />
+          <SearchFoodItem {...{ values, setValues }} />
         </Grid>
         <Grid xs={6}>
-          <OrderedFoodItems />
+          <Box sx={{ ml: 1 }}>
+            <OrderedFoodItems
+              {...{
+                values,
+                setValues,
+              }}
+            />
+          </Box>
         </Grid>
       </Grid>
     </>

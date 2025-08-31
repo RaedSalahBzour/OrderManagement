@@ -15,6 +15,7 @@ import RestaurantIcon from "@mui/icons-material/Restaurant";
 import ReorderIcon from "@mui/icons-material/Reorder";
 import { createAPIEndpoints, ENDPOINTS } from "../../api";
 import { useEffect, useState } from "react";
+import { roundTo2DecimalPoint } from "../../utils";
 
 const pMethods = [
   { id: "none", title: "Select" },
@@ -41,7 +42,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 export default function OrderForm(props) {
-  const { values, errors, handleInputChange } = props;
+  const { values, setValues, errors, handleInputChange } = props;
   const classes = useStyles();
   const [customerList, setCustomerList] = useState([]);
 
@@ -58,6 +59,13 @@ export default function OrderForm(props) {
       })
       .catch(err => console.log(err));
   }, []);
+
+  useEffect(() => {
+    let gTotal = values.orderDetails.reduce((tempTotal, item) => {
+      return tempTotal + item.quantity * item.foodItemPrice;
+    }, 0);
+    setValues({ ...values, gTotal: roundTo2DecimalPoint(gTotal) });
+  }, [JSON.stringify(values.orderDetails)]);
 
   return (
     <Form>
