@@ -34,53 +34,69 @@ export default function OrderedFoodItems(props) {
   return (
     <Box sx={{ mt: 2 }}>
       <List sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        {OrderedFoodItems.map((item, idx) => (
-          <Paper key={idx} sx={{ padding: 1 }}>
-            <ListItem
-              secondaryAction={
-                <IconButton
-                  edge="end"
-                  disableRipple
-                  onClick={() => removeFoodItem(idx, item.OrderDetailId)}
-                >
-                  <DeleteOutlineOutlinedIcon />
-                </IconButton>
-              }
-            >
-              <ListItemText
-                primary={item.foodItemName}
-                primaryTypographyProps={{
-                  component: "h1",
-                  style: {
-                    fontWeight: 500,
-                    fontSize: "1.2em",
-                  },
-                }}
-                secondary={
-                  <ButtonGroup size="small">
-                    <Button
-                      onClick={() => updateQuantity(idx, -1)}
-                      style={{ backgroundColor: "gray", color: "white" }}
-                    >
-                      -
-                    </Button>
-                    <Button disabled>{item.quantity}</Button>
-                    <Button
-                      onClick={() => updateQuantity(idx, 1)}
-                      style={{ backgroundColor: "gray", color: "white" }}
-                    >
-                      +
-                    </Button>
-                  </ButtonGroup>
+        {OrderedFoodItems.length === 0 ? (
+          <ListItem>
+            {" "}
+            <ListItemText
+              primary="Please select food items"
+              primaryTypographyProps={{
+                style: {
+                  textAlign: "center",
+                  fontStyle: "italic",
+                },
+              }}
+            />
+          </ListItem>
+        ) : (
+          OrderedFoodItems.map((item, idx) => (
+            <Paper key={idx} sx={{ padding: 1 }}>
+              <ListItem
+                secondaryAction={
+                  <IconButton
+                    edge="end"
+                    disableRipple
+                    onClick={() => removeFoodItem(idx, item.OrderDetailId)}
+                  >
+                    <DeleteOutlineOutlinedIcon />
+                  </IconButton>
                 }
-                secondaryTypographyProps={{ component: "span" }}
-              />
-              <span>
-                {"$" + roundTo2DecimalPoint(item.quantity * item.foodItemPrice)}
-              </span>
-            </ListItem>
-          </Paper>
-        ))}
+              >
+                <ListItemText
+                  primary={item.foodItemName}
+                  primaryTypographyProps={{
+                    component: "h1",
+                    style: {
+                      fontWeight: 500,
+                      fontSize: "1.2em",
+                    },
+                  }}
+                  secondary={
+                    <ButtonGroup size="small">
+                      <Button
+                        onClick={() => updateQuantity(idx, -1)}
+                        style={{ backgroundColor: "gray", color: "white" }}
+                      >
+                        -
+                      </Button>
+                      <Button disabled>{item.quantity}</Button>
+                      <Button
+                        onClick={() => updateQuantity(idx, 1)}
+                        style={{ backgroundColor: "gray", color: "white" }}
+                      >
+                        +
+                      </Button>
+                    </ButtonGroup>
+                  }
+                  secondaryTypographyProps={{ component: "span" }}
+                />
+                <span>
+                  {"$" +
+                    roundTo2DecimalPoint(item.quantity * item.foodItemPrice)}
+                </span>
+              </ListItem>
+            </Paper>
+          ))
+        )}
       </List>
     </Box>
   );

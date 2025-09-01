@@ -7,7 +7,7 @@ export default function useForm(getFreshModelObject) {
     const { name, value } = e.target;
     setValues({ ...values, [name]: value });
   };
-  const resetFromControls = () => {
+  const resetFormControls = () => {
     setValues(getFreshModelObject);
     setErrors({});
   };
@@ -17,6 +17,6 @@ export default function useForm(getFreshModelObject) {
     errors,
     setErrors,
     handleInputChange,
-    resetFromControls,
+    resetFormControls,
   };
 }

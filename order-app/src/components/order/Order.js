@@ -24,14 +24,23 @@ export default function Order() {
     errors,
     setErrors,
     handleInputChange,
-    resetFromControls,
+    resetFormControls,
   } = useForm(getFreshModelObject);
 
   return (
     <>
       <Grid container>
         <Grid xs={12}>
-          <OrderForm {...{ values, setValues, errors, handleInputChange }} />
+          <OrderForm
+            {...{
+              values,
+              setValues,
+              errors,
+              setErrors,
+              handleInputChange,
+              resetFormControls,
+            }}
+          />
         </Grid>
         <Grid xs={6}>
           <SearchFoodItem {...{ values, setValues }} />

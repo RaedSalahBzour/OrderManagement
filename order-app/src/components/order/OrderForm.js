@@ -42,7 +42,14 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 export default function OrderForm(props) {
-  const { values, setValues, errors, handleInputChange } = props;
+  const {
+    values,
+    setValues,
+    errors,
+    setErrors,
+    handleInputChange,
+    resetFormControls,
+  } = props;
   const classes = useStyles();
   const [customerList, setCustomerList] = useState([]);
 
@@ -67,8 +74,28 @@ export default function OrderForm(props) {
     setValues({ ...values, gTotal: roundTo2DecimalPoint(gTotal) });
   }, [JSON.stringify(values.orderDetails)]);
 
+  const validationForm = () => {
+    let temp = {};
+    temp.customerId = values.customerId !== 0 ? "" : "this field is required";
+    temp.pMethod = values.pMethod !== "none" ? "" : "this field is required";
+    temp.orderDetails =
+      values.orderDetails.length !== 0 ? "" : "this field is required";
+    setErrors({ ...temp });
+    return Object.values(temp).every(x => x === "");
+  };
+  const submitOrder = e => {
+    e.preventDefault();
+    if (validationForm()) {
+      createAPIEndpoints(ENDPOINTS.ORDER)
+        .create(values)
+        .then(res => {
+          resetFormControls();
+        })
+        .catch(err => console.log(err));
+    }
+  };
   return (
-    <Form>
+    <Form onSubmit={submitOrder}>
       <Grid container spacing={2}>
         <Grid item xs={6}>
           <Stack spacing={2}>
@@ -96,6 +123,7 @@ export default function OrderForm(props) {
               onChange={handleInputChange}
               options={customerList}
               fullWidth
+              error={errors.customerId}
             />
           </Stack>
         </Grid>
@@ -109,6 +137,7 @@ export default function OrderForm(props) {
               onChange={handleInputChange}
               options={pMethods}
               fullWidth
+              error={errors.pMethod}
             />
             <Input
               name="grandTotal"
