@@ -16,6 +16,8 @@ import ReorderIcon from "@mui/icons-material/Reorder";
 import { createAPIEndpoints, ENDPOINTS } from "../../api";
 import { useEffect, useState } from "react";
 import { roundTo2DecimalPoint } from "../../utils";
+import Popup from "../layout/Popup";
+import OrderList from "./OrderList";
 
 const pMethods = [
   { id: "none", title: "Select" },
@@ -52,13 +54,13 @@ export default function OrderForm(props) {
   } = props;
   const classes = useStyles();
   const [customerList, setCustomerList] = useState([]);
-
+  const [orderListVisibility, setOrderListVisibility] = useState(false);
   useEffect(() => {
     createAPIEndpoints(ENDPOINTS.CUSTOMER)
       .fetchAll()
       .then(res => {
         let customerList = res.data.map(item => ({
-          id: item.customerId,
+          id: item.customerID,
           title: item.customerName,
         }));
         customerList = [{ id: 0, title: "Select" }].concat(customerList);
@@ -94,81 +96,103 @@ export default function OrderForm(props) {
         .catch(err => console.log(err));
     }
   };
+  const openOrderList = () => {
+    setOrderListVisibility(true);
+  };
   return (
-    <Form onSubmit={submitOrder}>
-      <Grid container spacing={2}>
-        <Grid item xs={6}>
-          <Stack spacing={2}>
-            <Input
-              name="orderNumber"
-              label="Order Number"
-              disabled
-              fullWidth
-              value={values.orderNumber}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment
-                    className={classes.adornmentText}
-                    position="start"
-                  >
-                    #
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <Select
-              label="Customer"
-              name="customerId"
-              value={values.customerId}
-              onChange={handleInputChange}
-              options={customerList}
-              fullWidth
-              error={errors.customerId}
-            />
-          </Stack>
-        </Grid>
+    <>
+      <Form onSubmit={submitOrder}>
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <Stack spacing={2}>
+              <Input
+                name="orderNumber"
+                label="Order Number"
+                disabled
+                fullWidth
+                value={values.orderNumber}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment
+                      className={classes.adornmentText}
+                      position="start"
+                    >
+                      #
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Select
+                label="Customer"
+                name="customerId"
+                value={values.customerId}
+                onChange={handleInputChange}
+                options={customerList}
+                fullWidth
+                error={errors.customerId}
+              />
+            </Stack>
+          </Grid>
 
-        <Grid item xs={6}>
-          <Stack spacing={2}>
-            <Select
-              label="Payment Method"
-              name="pMethod"
-              value={values.pMethod}
-              onChange={handleInputChange}
-              options={pMethods}
-              fullWidth
-              error={errors.pMethod}
-            />
-            <Input
-              name="grandTotal"
-              label="Grand Total"
-              disabled
-              fullWidth
-              value={values.gTotal}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment
-                    className={classes.adornmentText}
-                    position="start"
-                  >
-                    $
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Stack>
-          <ButtonGroup
-            sx={{ marginTop: "10px" }}
-            className={classes.submitButtonGroup}
-          >
-            <MuiButton size="large" endIcon={<RestaurantIcon />} type="submit">
-              Submit
-            </MuiButton>
-            <MuiButton size="small" startIcon={<ReplayIcon />}></MuiButton>
-          </ButtonGroup>
-          <Button size="large" startIcon={<ReorderIcon />}></Button>
+          <Grid item xs={6}>
+            <Stack spacing={2}>
+              <Select
+                label="Payment Method"
+                name="pMethod"
+                value={values.pMethod}
+                onChange={handleInputChange}
+                options={pMethods}
+                fullWidth
+                error={errors.pMethod}
+              />
+              <Input
+                name="grandTotal"
+                label="Grand Total"
+                disabled
+                fullWidth
+                value={values.gTotal}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment
+                      className={classes.adornmentText}
+                      position="start"
+                    >
+                      $
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Stack>
+            <ButtonGroup
+              sx={{ marginTop: "10px" }}
+              className={classes.submitButtonGroup}
+            >
+              <MuiButton
+                size="large"
+                endIcon={<RestaurantIcon />}
+                type="submit"
+              >
+                Submit
+              </MuiButton>
+              <MuiButton size="small" startIcon={<ReplayIcon />}></MuiButton>
+            </ButtonGroup>
+            <Button
+              onClick={openOrderList}
+              size="large"
+              startIcon={<ReorderIcon />}
+            >
+              Orderes
+            </Button>
+          </Grid>
         </Grid>
-      </Grid>
-    </Form>
+      </Form>
+      <Popup
+        title="list of orders"
+        openPopup={orderListVisibility}
+        setOpenPopup={setOrderListVisibility}
+      >
+        <OrderList />
+      </Popup>
+    </>
   );
 }
