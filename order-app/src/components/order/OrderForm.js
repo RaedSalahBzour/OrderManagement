@@ -9,7 +9,6 @@ import Form from "../layout/Form";
 import Input from "../../controls/Input";
 import Select from "../../controls/Select";
 import Button from "../../controls/Button";
-import { makeStyles } from "@mui/styles";
 import ReplayIcon from "@mui/icons-material/Replay";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import ReorderIcon from "@mui/icons-material/Reorder";
@@ -24,25 +23,7 @@ const pMethods = [
   { id: "Cash", title: "Cash" },
   { id: "Card", title: "Card" },
 ];
-const useStyles = makeStyles(theme => ({
-  adornmentText: {
-    "& .MuiTypography-root": {
-      color: "#f3b33d",
-      fontWeight: "bolder",
-      fontSize: "1.5em",
-    },
-  },
-  submitButtonGroup: {
-    backgroundColor: "#f3b33d",
-    "& .MuiButton-root": {
-      color: "#000",
-      textTransform: "none",
-      "&:hover": {
-        backgroundColor: "#f3b33d",
-      },
-    },
-  },
-}));
+
 export default function OrderForm(props) {
   const {
     values,
@@ -52,9 +33,11 @@ export default function OrderForm(props) {
     handleInputChange,
     resetFormControls,
   } = props;
-  const classes = useStyles();
+
   const [customerList, setCustomerList] = useState([]);
   const [orderListVisibility, setOrderListVisibility] = useState(false);
+  const [orderId, setOrderId] = useState(0);
+
   useEffect(() => {
     createAPIEndpoints(ENDPOINTS.CUSTOMER)
       .fetchAll()
@@ -76,6 +59,20 @@ export default function OrderForm(props) {
     setValues({ ...values, gTotal: roundTo2DecimalPoint(gTotal) });
   }, [JSON.stringify(values.orderDetails)]);
 
+  useEffect(() => {
+    if (orderId === 0) resetFormControls();
+    else {
+      createAPIEndpoints(ENDPOINTS.ORDER)
+        .fetchById(orderId)
+        .then(res => {
+          setValues(res.data);
+          setErrors({});
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
+  }, [orderId]);
   const validationForm = () => {
     let temp = {};
     temp.customerId = values.customerId !== 0 ? "" : "this field is required";
@@ -85,20 +82,33 @@ export default function OrderForm(props) {
     setErrors({ ...temp });
     return Object.values(temp).every(x => x === "");
   };
+
   const submitOrder = e => {
+    console.log(values);
     e.preventDefault();
     if (validationForm()) {
-      createAPIEndpoints(ENDPOINTS.ORDER)
-        .create(values)
-        .then(res => {
-          resetFormControls();
-        })
-        .catch(err => console.log(err));
+      if (values.orderMasterId === 0) {
+        createAPIEndpoints(ENDPOINTS.ORDER)
+          .create(values)
+          .then(res => {
+            resetFormControls();
+          })
+          .catch(err => console.log(err));
+      } else {
+        createAPIEndpoints(ENDPOINTS.ORDER)
+          .update(values.orderMasterId, values)
+          .then(res => {
+            setOrderId(0);
+          })
+          .catch(err => console.log(err));
+      }
     }
   };
+
   const openOrderList = () => {
     setOrderListVisibility(true);
   };
+
   return (
     <>
       <Form onSubmit={submitOrder}>
@@ -114,8 +124,14 @@ export default function OrderForm(props) {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment
-                      className={classes.adornmentText}
                       position="start"
+                      sx={{
+                        "& .MuiTypography-root": {
+                          color: "#f3b33d",
+                          fontWeight: "bolder",
+                          fontSize: "1.5em",
+                        },
+                      }}
                     >
                       #
                     </InputAdornment>
@@ -154,8 +170,14 @@ export default function OrderForm(props) {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment
-                      className={classes.adornmentText}
                       position="start"
+                      sx={{
+                        "& .MuiTypography-root": {
+                          color: "#f3b33d",
+                          fontWeight: "bolder",
+                          fontSize: "1.5em",
+                        },
+                      }}
                     >
                       $
                     </InputAdornment>
@@ -164,8 +186,17 @@ export default function OrderForm(props) {
               />
             </Stack>
             <ButtonGroup
-              sx={{ marginTop: "10px" }}
-              className={classes.submitButtonGroup}
+              sx={{
+                marginTop: "10px",
+                backgroundColor: "#f3b33d",
+                "& .MuiButton-root": {
+                  color: "#000",
+                  textTransform: "none",
+                  "&:hover": {
+                    backgroundColor: "#f3b33d",
+                  },
+                },
+              }}
             >
               <MuiButton
                 size="large"
@@ -191,7 +222,7 @@ export default function OrderForm(props) {
         openPopup={orderListVisibility}
         setOpenPopup={setOrderListVisibility}
       >
-        <OrderList />
+        <OrderList {...{ setOrderId, setOrderListVisibility }} />
       </Popup>
     </>
   );
