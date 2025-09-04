@@ -5,7 +5,8 @@ import { TableBody, TableCell, TableRow, TableHead } from "@mui/material";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 export default function OrderList(props) {
   const [orderList, setOrderList] = useState([]);
-  const { setOrderId, setOrderListVisibility } = props;
+  const { setOrderId, setOrderListVisibility, resetFormControls, setNotify } =
+    props;
   useEffect(() => {
     createAPIEndpoints(ENDPOINTS.ORDER)
       .fetchAll()
@@ -17,6 +18,19 @@ export default function OrderList(props) {
   const showForUpdate = id => {
     setOrderId(id);
     setOrderListVisibility(false);
+  };
+  const deleteOrder = id => {
+    if (window.confirm("Are you sure to delete this record?")) {
+      createAPIEndpoints(ENDPOINTS.ORDER)
+        .delete(id)
+        .then(res => {
+          setOrderListVisibility(false);
+          setOrderId(0);
+          resetFormControls();
+          setNotify({ isOpen: true, message: "order has been deleted" });
+        })
+        .catch(err => console.log(err));
+    }
   };
   return (
     <Table>
@@ -61,7 +75,12 @@ export default function OrderList(props) {
               {item.gTotal}
             </TableCell>
             <TableCell>
-              <DeleteOutlineOutlinedIcon color="secondary" />
+              <DeleteOutlineOutlinedIcon
+                onClick={() => {
+                  deleteOrder(item.orderMasterId);
+                }}
+                color="secondary"
+              />
             </TableCell>
           </TableRow>
         ))}

@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import { roundTo2DecimalPoint } from "../../utils";
 import Popup from "../layout/Popup";
 import OrderList from "./OrderList";
+import Notification from "../layout/Notification";
 
 const pMethods = [
   { id: "none", title: "Select" },
@@ -37,6 +38,7 @@ export default function OrderForm(props) {
   const [customerList, setCustomerList] = useState([]);
   const [orderListVisibility, setOrderListVisibility] = useState(false);
   const [orderId, setOrderId] = useState(0);
+  const [notify, setNotify] = useState({ isOpen: false });
 
   useEffect(() => {
     createAPIEndpoints(ENDPOINTS.CUSTOMER)
@@ -92,6 +94,7 @@ export default function OrderForm(props) {
           .create(values)
           .then(res => {
             resetFormControls();
+            setNotify({ isOpen: true, message: "new order has been created" });
           })
           .catch(err => console.log(err));
       } else {
@@ -99,6 +102,7 @@ export default function OrderForm(props) {
           .update(values.orderMasterId, values)
           .then(res => {
             setOrderId(0);
+            setNotify({ isOpen: true, message: "the order has been updated" });
           })
           .catch(err => console.log(err));
       }
@@ -109,6 +113,10 @@ export default function OrderForm(props) {
     setOrderListVisibility(true);
   };
 
+  const resetForm = () => {
+    resetFormControls();
+    setOrderId(0);
+  };
   return (
     <>
       <Form onSubmit={submitOrder}>
@@ -205,7 +213,11 @@ export default function OrderForm(props) {
               >
                 Submit
               </MuiButton>
-              <MuiButton size="small" startIcon={<ReplayIcon />}></MuiButton>
+              <MuiButton
+                size="small"
+                onClick={resetForm}
+                startIcon={<ReplayIcon />}
+              ></MuiButton>
             </ButtonGroup>
             <Button
               onClick={openOrderList}
@@ -222,8 +234,16 @@ export default function OrderForm(props) {
         openPopup={orderListVisibility}
         setOpenPopup={setOrderListVisibility}
       >
-        <OrderList {...{ setOrderId, setOrderListVisibility }} />
+        <OrderList
+          {...{
+            setOrderId,
+            setOrderListVisibility,
+            resetFormControls,
+            setNotify,
+          }}
+        />
       </Popup>
+      <Notification {...{ notify, setNotify }} />
     </>
   );
 }
